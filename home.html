@@ -14,11 +14,11 @@
     <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-md">
+                <div class="bg-gradient-to-r from-orange-500 to-red-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-md">
                     <i class="fas fa-coffee"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-lg text-slate-800">مرحباً، <span id="loggedUserName" class="text-orange-500"></span></h1>
+                    <h1 class="font-black text-lg text-slate-800">مرحباً، <span id="loggedUserName" class="text-orange-600"></span></h1>
                     <p class="text-xs text-slate-500 font-bold" id="userRoleTitle"></p>
                 </div>
             </div>
@@ -28,73 +28,127 @@
         </div>
     </header>
 
-    <!-- شاشة الموظف -->
-    <main id="viewKiosk" class="hidden max-w-6xl mx-auto w-full p-4 md:p-6 flex-1 gap-6 grid grid-cols-1 lg:grid-cols-3">
-        <!-- نموذج الطلب -->
-        <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden h-fit">
-            <div class="bg-slate-900 p-6 text-white">
-                <h2 class="text-2xl font-black">اطلب مشروبك ☕</h2>
+    <!-- 1. شاشة الموظف -->
+    <main id="viewKiosk" class="hidden max-w-7xl mx-auto w-full p-4 md:p-6 flex-1 gap-6 grid grid-cols-1 lg:grid-cols-3">
+        
+        <!-- نموذج الطلب والزيارات (Tabs) -->
+        <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden h-fit flex flex-col">
+            <div class="flex border-b border-slate-200 bg-slate-900">
+                <button id="btnOrderTab" onclick="switchOrderType('drink')" class="flex-1 py-4 text-sm font-black border-b-4 border-orange-500 text-orange-500 transition-all">طلب مشروب ☕</button>
+                <button id="btnVisitorTab" onclick="switchOrderType('visitor')" class="flex-1 py-4 text-sm font-black border-b-4 border-transparent text-slate-400 hover:text-white transition-all">طلب ضيافة زيارة 🚨</button>
             </div>
-            <form onsubmit="handleEmployeeOrder(event)" class="p-6 space-y-6">
+            
+            <!-- طلب مشروب -->
+            <form id="formDrink" onsubmit="handleEmployeeOrder(event)" class="p-6 space-y-6">
                 <div id="kioskItemsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="kioskSugar" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500"><option value="مضبوط">سكر: مضبوط</option><option value="زيادة">سكر: زيادة</option><option value="سادة">سكر: سادة</option></select>
-                    <select id="kioskMilk" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500"><option value="بدون حليب">بدون حليب</option><option value="مع حليب">مع حليب</option></select>
+                    <select id="kioskSugar" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold">
+                        <option value="بدون سكر">بدون سكر</option>
+                        <option value="نص معلقة سكر">نص معلقة سكر</option>
+                        <option value="معلقة سكر">معلقة سكر</option>
+                        <option value="معلقتين سكر">معلقتين سكر</option>
+                        <option value="3 معالق سكر">3 معالق سكر</option>
+                    </select>
+                    <select id="kioskMilk" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold">
+                        <option value="بدون حليب">بدون حليب</option>
+                        <option value="مع حليب">مع حليب</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ملاحظات إضافية (اختياري):</label>
+                    <input type="text" id="kioskNotes" placeholder="مثال: الشاي خفيف، القهوة في فنجان كبير..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                 </div>
                 <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold p-4 rounded-xl shadow-lg transition-all">إرسال الطلب الآن</button>
+            </form>
+
+            <!-- طلب زيارة -->
+            <form id="formVisitor" onsubmit="handleVisitorOrder(event)" class="hidden p-6 space-y-6">
+                <div class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-bold text-sm">
+                    <i class="fas fa-info-circle"></i> سيتم إرسال تنبيه فوري لعامل البوفيه للتوجه لمكتبك لخدمة الضيوف.
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">اختر البوفيه المطلوب توجيه النداء إليه:</label>
+                    <select id="visitorBuffetSelect" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl font-bold focus:ring-2 focus:ring-red-500 outline-none">
+                        <!-- تضاف برمجياً -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-2">تفاصيل إضافية للزيارة (اختياري):</label>
+                    <input type="text" id="visitorNotes" placeholder="مثال: عدد 3 ضيوف في غرفة الاجتماعات..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-red-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold p-4 rounded-xl shadow-lg shadow-red-500/30 transition-all">إرسال نداء الضيافة الآن</button>
             </form>
         </div>
 
         <!-- متتبع الطلبات والسجل (Tabs) -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden h-fit flex flex-col">
-            <!-- أزرار التنقل (Tabs) -->
             <div class="flex border-b border-slate-200 bg-slate-50">
-                <button id="tabActive" onclick="switchKioskTab('active')" class="flex-1 py-3.5 text-sm font-black border-b-2 border-orange-500 text-orange-600 bg-white transition-all">
-                    الطلبات الحالية
-                </button>
-                <button id="tabHistory" onclick="switchKioskTab('history')" class="flex-1 py-3.5 text-sm font-black border-b-2 border-transparent text-slate-500 hover:bg-slate-100 transition-all">
-                    سجل طلباتي
-                </button>
+                <button id="tabActive" onclick="switchKioskTab('active')" class="flex-1 py-3 text-sm font-black border-b-2 border-orange-500 text-orange-600 bg-white">الطلبات الحالية</button>
+                <button id="tabHistory" onclick="switchKioskTab('history')" class="flex-1 py-3 text-sm font-black border-b-2 border-transparent text-slate-500 hover:bg-slate-100">سجل طلباتي</button>
             </div>
             
-            <!-- محتوى الطلبات الحالية -->
             <div id="kioskActiveContent" class="p-5">
-                <div id="employeeOrderTracker" class="space-y-3">
-                    <!-- الطلبات الحالية تظهر هنا -->
-                </div>
+                <div id="employeeOrderTracker" class="space-y-3"></div>
             </div>
 
-            <!-- محتوى سجل الطلبات -->
             <div id="kioskHistoryContent" class="p-5 hidden max-h-96 overflow-y-auto bg-slate-50/50">
-                <div id="employeeOrderHistory" class="space-y-2">
-                    <!-- الطلبات السابقة تظهر هنا -->
-                </div>
+                <div id="employeeOrderHistory" class="space-y-2"></div>
             </div>
         </div>
     </main>
 
-    <!-- شاشة عامل البوفيه -->
+    <!-- 2. شاشة عامل البوفيه -->
     <main id="viewBuffet" class="hidden max-w-7xl mx-auto w-full p-4 md:p-6 flex-1">
         <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2"><i class="fas fa-concierge-bell text-orange-500"></i> شاشة تحضير الطلبات</h2>
         <div id="buffetOrdersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </main>
 
-    <!-- شاشة المدير -->
+    <!-- 3. شاشة المدير (مدير بوفيه / مدير عام) -->
     <main id="viewManager" class="hidden max-w-7xl mx-auto w-full p-4 md:p-6 flex-1 space-y-6">
+        
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <h2 class="text-2xl font-black text-slate-800">لوحة تحكم الإدارة والحسابات</h2>
-            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 text-sm transform hover:-translate-y-0.5">
-                <i class="fas fa-file-excel"></i> سحب تقرير الإكسيل (Excel)
+            <div>
+                <h2 class="text-2xl font-black text-slate-800" id="mgrDashboardTitle">لوحة تحكم الإدارة</h2>
+                <p class="text-slate-500 text-sm font-bold" id="mgrDashboardSub">النطاق: -</p>
+            </div>
+            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2">
+                <i class="fas fa-file-excel"></i> سحب تقرير (Excel)
             </button>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center"><span class="text-slate-500 font-bold text-sm">إجمالي الطلبات</span><h3 id="mgrStatOrders" class="text-4xl font-black text-slate-800 mt-2">0</h3></div>
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center"><span class="text-slate-500 font-bold text-sm">إجمالي التكلفة (ج.م)</span><h3 id="mgrStatCosts" class="text-4xl font-black text-emerald-600 mt-2">0</h3></div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center"><span class="text-slate-500 font-bold text-xs">إجمالي الطلبات</span><h3 id="mgrStatOrders" class="text-3xl font-black text-slate-800 mt-1">0</h3></div>
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center"><span class="text-slate-500 font-bold text-xs">التكلفة الإجمالية (ج.م)</span><h3 id="mgrStatCosts" class="text-3xl font-black text-emerald-600 mt-1">0</h3></div>
+            
+            <!-- نموذج إضافة حساب للمديرين -->
+            <div class="col-span-2 bg-slate-900 rounded-3xl shadow-sm p-5 text-white">
+                <h3 class="font-black text-orange-400 mb-3 text-sm flex items-center gap-2"><i class="fas fa-user-plus"></i> إضافة مستخدم جديد للنظام</h3>
+                <form onsubmit="handleAddUser(event)" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="text" id="addUName" placeholder="الاسم الكامل" required class="col-span-2 md:col-span-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs outline-none focus:border-orange-500">
+                    <input type="text" id="addUPrint" placeholder="رقم البصمة" required class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs outline-none focus:border-orange-500">
+                    <input type="password" id="addUPass" placeholder="الباسورد" required class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs outline-none focus:border-orange-500">
+                    
+                    <select id="addURole" class="bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs outline-none font-bold">
+                        <option value="employee">موظف عادي</option>
+                        <option value="buffet">عامل بوفيه</option>
+                        <option value="manager">مدير بوفيه</option>
+                        <option value="super_manager" id="optSuper" class="hidden text-orange-400">مدير عام للنظام</option>
+                    </select>
+
+                    <select id="addUBuffet" class="col-span-2 md:col-span-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs outline-none font-bold">
+                        <!-- تضاف برمجياً -->
+                    </select>
+
+                    <button type="submit" class="col-span-2 md:col-span-5 bg-orange-500 hover:bg-orange-600 text-white font-bold p-2 rounded-lg text-xs transition-all mt-1">حفظ الحساب</button>
+                </form>
+            </div>
         </div>
+
+        <!-- جدول التقارير -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 overflow-x-auto">
             <table class="w-full text-right text-sm">
                 <thead>
-                    <tr class="bg-slate-50 text-slate-600 border-b border-slate-200"><th class="p-3 font-bold">اسم الموظف</th><th class="p-3 font-bold">البوفيه</th><th class="p-3 font-bold">المشروب</th><th class="p-3 font-bold">الملاحظات</th><th class="p-3 font-bold">السعر</th><th class="p-3 font-bold">الوقت</th><th class="p-3 font-bold">الحالة</th></tr>
+                    <tr class="bg-slate-50 text-slate-600 border-b border-slate-200"><th class="p-3 font-bold">الموظف</th><th class="p-3 font-bold">البوفيه</th><th class="p-3 font-bold">الطلب</th><th class="p-3 font-bold">الملاحظات</th><th class="p-3 font-bold">السعر</th><th class="p-3 font-bold">الوقت</th><th class="p-3 font-bold">الحالة</th></tr>
                 </thead>
                 <tbody id="managerOrdersTableBody"></tbody>
             </table>
