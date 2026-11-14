@@ -15,31 +15,43 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-md"><i class="fas fa-coffee"></i></div>
-                <div><h1 class="font-black text-lg text-slate-800">مرحباً، <span id="loggedUserName" class="text-orange-500"></span></h1><p class="text-xs text-slate-500 font-bold" id="userRoleTitle"></p></div>
+                <div>
+                    <h1 class="font-black text-lg text-slate-800">مرحباً، <span id="loggedUserName" class="text-orange-500"></span></h1>
+                    <p class="text-xs text-slate-500 font-bold" id="userRoleTitle"></p>
+                </div>
             </div>
             <button onclick="logout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition-all text-sm flex items-center gap-2"><i class="fas fa-sign-out-alt"></i> خروج</button>
         </div>
     </header>
 
-    <!-- شاشة الموظف -->
+    <!-- شاشة الموظف والطلب -->
     <main id="viewKiosk" class="hidden max-w-6xl mx-auto w-full p-4 md:p-6 flex-1 gap-6 grid grid-cols-1 lg:grid-cols-3">
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden h-fit">
-                <div class="bg-slate-900 p-6 text-white"><h2 class="text-2xl font-black">اطلب مشروبك ☕</h2></div>
+                <div class="bg-slate-900 p-6 text-white">
+                    <h2 class="text-2xl font-black">اطلب مشروبك أو وجبتك ☕</h2>
+                </div>
                 <form onsubmit="handleEmployeeOrder(event)" class="p-6 space-y-5">
-                    <div id="kioskItemsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                    <!-- أزرار فلترة التصنيفات -->
+                    <div id="kioskCategoryTabs" class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-100"></div>
+
+                    <!-- الأصناف مقسمة تحت التصنيفات -->
+                    <div id="kioskItemsGrid" class="space-y-5"></div>
+                    
+                    <div id="kioskOptionsRow" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                        <div id="kioskSugarWrapper">
                             <label class="block text-xs font-bold text-slate-500 mb-1">السكر:</label>
-                            <select id="kioskSugar" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold">
-                                <option value="نص معلقة">نص معلقة</option><option value="معلقة">معلقة 1</option><option value="معلقة ونص">معلقة ونص (1.5)</option><option value="معلقتين" selected>معلقتين (مضبوط)</option><option value="معلقتين ونص">معلقتين ونص (2.5)</option><option value="تلت معالق">تلت معالق</option><option value="بدون سكر">بدون سكر (سادة)</option>
+                            <select id="kioskSugar" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold"></select>
+                        </div>
+                        <div id="kioskMilkWrapper">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">الحليب:</label>
+                            <select id="kioskMilk" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold">
+                                <option value="بدون حليب">بدون حليب</option>
+                                <option value="مع حليب">مع حليب</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">إضافات:</label>
-                            <select id="kioskMilk" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 font-bold"><option value="بدون حليب">بدون حليب</option><option value="مع حليب">مع حليب</option></select>
-                        </div>
                     </div>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">ملاحظات إضافية:</label>
                         <input type="text" id="kioskNotes" placeholder="مثال: يرجى إحضاره تيك أواي، أو الكوباية زجاج..." class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none">
@@ -48,9 +60,9 @@
                 </form>
             </div>
 
-            <!-- طلب زيارة (ضيافة) -->
-            <div class="bg-orange-50 border border-orange-200 rounded-3xl p-6 shadow-sm">
-                <h3 class="font-black text-orange-800 text-lg mb-2"><i class="fas fa-bell"></i> طلب ضيافة لزيارة</h3>
+            <!-- طلب زيارة (ضيافة) - متاح للمدير والسوبر أدمن فقط -->
+            <div id="guestRequestSection" class="hidden bg-orange-50 border border-orange-200 rounded-3xl p-6 shadow-sm">
+                <h3 class="font-black text-orange-800 text-lg mb-2"><i class="fas fa-bell"></i> طلب ضيافة لزيارة (للمديرين فقط)</h3>
                 <p class="text-xs text-orange-700 mb-4" id="guestDescText">اطلب أحد عمال البوفيه لمكتبك فوراً لوجود ضيوف.</p>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <select id="guestBuffet" class="flex-1 bg-white border border-orange-300 p-3 rounded-xl outline-none font-bold text-sm"></select>
@@ -81,10 +93,11 @@
     <main id="viewManager" class="hidden max-w-7xl mx-auto w-full p-4 md:p-6 flex-1 space-y-6">
         <div class="flex border-b border-slate-200 gap-4 mb-6 flex-wrap">
             <button id="mgrTabDashboard" onclick="switchManagerTab('dashboard')" class="pb-3 text-base sm:text-lg font-black border-b-4 border-emerald-500 text-emerald-600">الإحصائيات والتقارير</button>
-            <button id="mgrTabApprovals" onclick="switchManagerTab('approvals')" class="pb-3 text-base sm:text-lg font-black border-b-4 border-transparent text-slate-500 hover:text-slate-800 relative">موافقات الضيافة <span id="approvalBadge" class="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] px-1.5 rounded-full hidden">0</span></button>
-            <button id="mgrTabUsers" onclick="switchManagerTab('users')" class="pb-3 text-base sm:text-lg font-black border-b-4 border-transparent text-slate-500 hover:text-slate-800">إدارة المستخدمين</button>
+            <button id="mgrTabMenu" onclick="switchManagerTab('menu')" class="pb-3 text-base sm:text-lg font-black border-b-4 border-transparent text-slate-500 hover:text-slate-800">إدارة المنيو والتصنيفات 🍽️</button>
+            <button id="mgrTabUsers" onclick="switchManagerTab('users')" class="pb-3 text-base sm:text-lg font-black border-b-4 border-transparent text-slate-500 hover:text-slate-800">إدارة المستخدمين 👥</button>
         </div>
 
+        <!-- 1. الإحصائيات والتقارير -->
         <div id="managerDashboardContent">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-black text-lg">سجل طلبات اليوم</h3>
@@ -102,13 +115,115 @@
             </div>
         </div>
 
-        <div id="managerApprovalsContent" class="hidden">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <h3 class="font-black text-slate-800 mb-4 text-lg">طلبات الزيارة والضيافة المعلقة</h3>
-                <div id="managerApprovalsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <!-- 2. إدارة المنيو والتصنيفات (للسوبر أدمن فقط) -->
+        <div id="managerMenuContent" class="hidden space-y-6">
+            <!-- شريط إدارة التصنيفات -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-black text-slate-800 text-lg">📂 إدارة التصنيفات (Categories)</h3>
+                <form onsubmit="handleAddCategory(event)" class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="newCatName" placeholder="اسم التصنيف الجديد (مثال: مشروبات ساخنة، مخبوزات، عصائر...)" required class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-orange-500 font-bold">
+                        <div class="flex gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200">
+                            <button type="button" id="catModeEmojiBtn" onclick="switchIconInputMode('cat', 'emoji')" class="px-3 py-1.5 rounded-lg text-xs font-black bg-orange-500 text-white transition-all">😀 أيكون (Emoji)</button>
+                            <button type="button" id="catModeImageBtn" onclick="switchIconInputMode('cat', 'image')" class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-slate-100 transition-all">🖼️ صورة من الجهاز</button>
+                        </div>
+                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-sm whitespace-nowrap shadow-sm">إضافة تصنيف ➕</button>
+                    </div>
+
+                    <input type="hidden" id="newCatIcon" value="🍽️">
+
+                    <!-- اختيار إيموجي للتصنيف -->
+                    <div id="catEmojiSection" class="pt-1">
+                        <div id="catEmojiPicker" class="grid grid-cols-8 sm:grid-cols-12 gap-1.5 bg-white p-2.5 rounded-xl border border-slate-200 max-h-32 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- رفع صورة للتصنيف من الجهاز -->
+                    <div id="catImageSection" class="hidden flex items-center gap-4 bg-white p-3 rounded-xl border border-dashed border-orange-300">
+                        <div id="catImagePreview" class="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl overflow-hidden shrink-0">🖼️</div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">اختر صورة التصنيف من جهازك:</label>
+                            <input type="file" id="catImageFile" accept="image/*" onchange="handleIconFileUpload(event, 'newCatIcon', 'catImagePreview')" class="text-xs text-slate-600 file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200 cursor-pointer">
+                        </div>
+                    </div>
+                </form>
+
+                <div id="managerCategoriesList" class="flex flex-wrap gap-2 pt-1"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- نموذج إضافة صنف -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 lg:col-span-1 h-fit">
+                    <h3 class="font-black text-slate-800 mb-4 text-lg">إضافة مشروب أو مأكولات</h3>
+                    <form onsubmit="handleAddMenuItem(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">التصنيف:</label>
+                            <select id="addMCategory" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none focus:border-orange-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">اسم الصنف:</label>
+                            <input type="text" id="addMName" placeholder="مثال: عصير مانجو، كرواسون..." required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none focus:border-orange-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">السعر (ج.م):</label>
+                            <input type="number" id="addMPrice" min="0" placeholder="0" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none focus:border-orange-500">
+                        </div>
+
+                        <!-- اختيار شكل الصنف: إيموجي أو صورة من الجهاز -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-500">شكل الصنف (أيكون أو صورة):</label>
+                            <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                <button type="button" id="addModeEmojiBtn" onclick="switchIconInputMode('add', 'emoji')" class="py-1.5 rounded-lg text-xs font-black bg-orange-500 text-white transition-all">😀 اختيار Emoji</button>
+                                <button type="button" id="addModeImageBtn" onclick="switchIconInputMode('add', 'image')" class="py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-white transition-all">🖼️ رفع صورة</button>
+                            </div>
+                            <input type="hidden" id="addMIcon" value="☕">
+
+                            <div id="addEmojiSection">
+                                <div id="addEmojiPicker" class="grid grid-cols-6 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-36 overflow-y-auto"></div>
+                            </div>
+
+                            <div id="addImageSection" class="hidden flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-dashed border-orange-300">
+                                <div id="addImagePreview" class="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-2xl overflow-hidden shrink-0">🖼️</div>
+                                <div class="flex-1 min-w-0">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">اختر صورة من جهازك:</label>
+                                    <input type="file" id="addMImageFile" accept="image/*" onchange="handleIconFileUpload(event, 'addMIcon', 'addImagePreview')" class="w-full text-[11px] text-slate-600 file:ml-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200 cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <span class="text-sm font-bold text-slate-700">🍬 متاح اختيار السكر</span>
+                                <input type="checkbox" id="addMHasSugar" checked onchange="toggleSugarBuilder('add')" class="w-5 h-5 accent-orange-500 rounded">
+                            </label>
+
+                            <!-- تخصيص درجات السكر لهذا المشروب -->
+                            <div id="addMSugarOptionsWrap" class="pt-2 border-t border-slate-200 space-y-2">
+                                <span class="block text-[11px] font-bold text-slate-500">درجات السكر المتاحة لهذا الصنف:</span>
+                                <div id="addMSugarOptionsList" class="flex flex-wrap gap-1.5"></div>
+                                <div class="flex gap-1.5 pt-1">
+                                    <input type="text" id="addCustomSugarInput" placeholder="أضف درجة سكر (مثال: سكر دايت)" class="flex-1 bg-white border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs outline-none">
+                                    <button type="button" onclick="addCustomSugarOption('add')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+</button>
+                                </div>
+                            </div>
+
+                            <label class="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-200">
+                                <span class="text-sm font-bold text-slate-700">🥛 متاح إضافة حليب</span>
+                                <input type="checkbox" id="addMHasMilk" checked class="w-5 h-5 accent-orange-500 rounded">
+                            </label>
+                        </div>
+                        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold p-3.5 rounded-xl shadow-md transition-all">إضافة للمنيو ➕</button>
+                    </form>
+                </div>
+
+                <!-- عرض الأصناف مقسمة تحت التصنيفات -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <h3 class="font-black text-slate-800 mb-4 text-lg">الأصناف الحالية (مرتبة حسب التصنيف)</h3>
+                    <div id="managerMenuGrid" class="space-y-6"></div>
+                </div>
             </div>
         </div>
 
+        <!-- 3. إدارة المستخدمين (للسوبر أدمن فقط) -->
         <div id="managerUsersContent" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 lg:col-span-1 h-fit">
                 <h3 class="font-black text-slate-800 mb-4 text-lg">إضافة مستخدم جديد</h3>
@@ -117,7 +232,12 @@
                     <input type="text" id="addUDept" placeholder="الإدارة التابع لها" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
                     <input type="text" id="addUFingerprint" placeholder="رقم البصمة" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
                     <input type="text" id="addUPassword" placeholder="كلمة المرور" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
-                    <select id="addURole" class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none"><option value="employee">موظف عادي</option><option value="buffet">عامل بوفيه</option><option value="manager" class="super-only">مدير بوفيه</option><option value="super_admin" class="super-only">مدير عام (سوبر)</option></select>
+                    <select id="addURole" class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none">
+                        <option value="employee">موظف عادي</option>
+                        <option value="buffet">عامل بوفيه</option>
+                        <option value="manager">مدير بوفيه</option>
+                        <option value="super_admin">مدير عام (سوبر)</option>
+                    </select>
                     <div id="buffetSelectDiv"><select id="addUBuffet" class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none"></select></div>
                     <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded-xl shadow-md">إنشاء الحساب</button>
                 </form>
@@ -131,6 +251,124 @@
             </div>
         </div>
     </main>
+
+    <!-- نافذة تعديل المستخدم (للسوبر أدمن) -->
+    <div id="editUserModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-black text-lg text-slate-800">تعديل بيانات المستخدم</h3>
+                <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-red-500 font-black text-2xl leading-none">&times;</button>
+            </div>
+            <form onsubmit="saveEditedUser(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editUOrigFp">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">الاسم الكامل:</label>
+                    <input type="text" id="editUName" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">الإدارة:</label>
+                    <input type="text" id="editUDept" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">رقم البصمة:</label>
+                        <input type="text" id="editUFingerprint" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">كلمة المرور:</label>
+                        <input type="text" id="editUPassword" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">الصلاحية (الدور):</label>
+                    <select id="editURole" class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none">
+                        <option value="employee">موظف عادي</option>
+                        <option value="buffet">عامل بوفيه</option>
+                        <option value="manager">مدير بوفيه</option>
+                        <option value="super_admin">مدير عام (سوبر)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">البوفيه التابع له:</label>
+                    <select id="editUBuffet" class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none"></select>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm">حفظ التعديلات ✅</button>
+                    <button type="button" onclick="closeEditUserModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-sm">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل الصنف (للسوبر أدمن) -->
+    <div id="editMenuModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-black text-lg text-slate-800">تعديل بيانات الصنف</h3>
+                <button onclick="closeEditMenuModal()" class="text-slate-400 hover:text-red-500 font-black text-2xl leading-none">&times;</button>
+            </div>
+            <form onsubmit="saveEditedMenuItem(event)" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="editMId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">التصنيف:</label>
+                    <select id="editMCategory" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">اسم الصنف:</label>
+                    <input type="text" id="editMName" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1">السعر (ج.م):</label>
+                    <input type="number" id="editMPrice" min="0" required class="w-full bg-slate-50 border p-3 rounded-xl text-sm outline-none">
+                </div>
+
+                <!-- تعديل شكل الصنف: إيموجي أو صورة -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-500">شكل الصنف (أيكون أو صورة):</label>
+                    <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <button type="button" id="editModeEmojiBtn" onclick="switchIconInputMode('edit', 'emoji')" class="py-1.5 rounded-lg text-xs font-black bg-orange-500 text-white transition-all">😀 اختيار Emoji</button>
+                        <button type="button" id="editModeImageBtn" onclick="switchIconInputMode('edit', 'image')" class="py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-white transition-all">🖼️ رفع صورة</button>
+                    </div>
+                    <input type="hidden" id="editMIcon">
+
+                    <div id="editEmojiSection">
+                        <div id="editEmojiPicker" class="grid grid-cols-6 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-32 overflow-y-auto"></div>
+                    </div>
+
+                    <div id="editImageSection" class="hidden flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-dashed border-orange-300">
+                        <div id="editImagePreview" class="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-2xl overflow-hidden shrink-0">🖼️</div>
+                        <div class="flex-1 min-w-0">
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">اختر صورة جديدة من جهازك:</label>
+                            <input type="file" id="editMImageFile" accept="image/*" onchange="handleIconFileUpload(event, 'editMIcon', 'editImagePreview')" class="w-full text-[11px] text-slate-600 file:ml-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm font-bold text-slate-700">🍬 متاح اختيار السكر</span>
+                        <input type="checkbox" id="editMHasSugar" onchange="toggleSugarBuilder('edit')" class="w-5 h-5 accent-orange-500 rounded">
+                    </label>
+                    <div id="editMSugarOptionsWrap" class="pt-2 border-t border-slate-200 space-y-2">
+                        <span class="block text-[11px] font-bold text-slate-500">درجات السكر المتاحة لهذا الصنف:</span>
+                        <div id="editMSugarOptionsList" class="flex flex-wrap gap-1.5"></div>
+                        <div class="flex gap-1.5 pt-1">
+                            <input type="text" id="editCustomSugarInput" placeholder="أضف درجة سكر جديدة..." class="flex-1 bg-white border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs outline-none">
+                            <button type="button" onclick="addCustomSugarOption('edit')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+</button>
+                        </div>
+                    </div>
+                    <label class="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-200">
+                        <span class="text-sm font-bold text-slate-700">🥛 متاح إضافة حليب</span>
+                        <input type="checkbox" id="editMHasMilk" class="w-5 h-5 accent-orange-500 rounded">
+                    </label>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm">حفظ التعديلات</button>
+                    <button type="button" onclick="closeEditMenuModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-sm">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- نافذة تسجيل المشروبات لعمال البوفيه (الزيارات) -->
     <div id="guestOrderModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
@@ -147,9 +385,7 @@
                     </div>
                     <button type="button" onclick="generateGuestForms()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md">تأكيد العدد</button>
                 </div>
-                <div id="guestDrinksContainer" class="space-y-3 hidden mt-4 border-t border-slate-200 pt-4">
-                    <!-- سيتم توليد النماذج هنا -->
-                </div>
+                <div id="guestDrinksContainer" class="space-y-3 hidden mt-4 border-t border-slate-200 pt-4"></div>
             </div>
             <div class="p-6 border-t border-slate-200 bg-slate-50">
                 <button id="saveGuestOrderBtn" onclick="submitGuestOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-4 rounded-xl hidden shadow-lg transform transition-all hover:-translate-y-0.5">حفظ وإنهاء الطلب ✅</button>
